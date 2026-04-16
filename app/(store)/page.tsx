@@ -1,11 +1,11 @@
-import { createStaticClient } from '@/lib/supabase-server'
+import { createServiceClient } from '@/lib/supabase-server'
 import { ProductWithImages } from '@/types'
 import { ProductGrid } from '@/components/store/ProductGrid'
 
-export const revalidate = 60
+export const dynamic = 'force-dynamic'
 
 async function getProducts(): Promise<ProductWithImages[]> {
-  const supabase = createStaticClient()
+  const supabase = createServiceClient()
   const { data, error } = await supabase
     .from('products')
     .select('*, images:product_images(*)')

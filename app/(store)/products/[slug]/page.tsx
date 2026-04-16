@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { createStaticClient } from '@/lib/supabase-server'
+import { createServiceClient } from '@/lib/supabase-server'
 import { ProductWithImages } from '@/types'
 import { formatPrice } from '@/lib/utils'
 import { ImageGallery } from '@/components/store/ImageGallery'
@@ -16,7 +16,7 @@ interface Props {
 }
 
 async function getProduct(slug: string): Promise<ProductWithImages | null> {
-  const supabase = createStaticClient()
+  const supabase = createServiceClient()
   const { data, error } = await supabase
     .from('products')
     .select('*, images:product_images(*)')

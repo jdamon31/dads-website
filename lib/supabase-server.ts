@@ -35,6 +35,14 @@ export function createStaticClient() {
   )
 }
 
+// Cookie-free service role client — bypasses RLS, safe for server-only reads
+export function createServiceClient() {
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+}
+
 // Admin client that bypasses RLS — use only in server-side Route Handlers
 export function createAdminClient() {
   const cookieStore = cookies()
