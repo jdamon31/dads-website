@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 async function getStats() {
   const supabase = createAdminClient()
 
-  const [activeRes, soldRes, ordersRes, recentRes, soldProductsRes] = await Promise.all([
+  const [activeRes, soldRes, ordersRes, recentRes, soldProductsRes, allProductsRes] = await Promise.all([
     supabase.from('products').select('id', { count: 'exact', head: true }).eq('status', 'active'),
     supabase.from('products').select('id', { count: 'exact', head: true }).eq('status', 'sold'),
     supabase.from('orders').select('id, total_cents', { count: 'exact' }),
@@ -22,6 +22,10 @@ async function getStats() {
       .select('price, purchase_price')
       .eq('status', 'sold')
       .not('purchase_price', 'is', null),
+    supabase
+      .from('products')
+      .select('price, purchase_price')
+      .neq('status', 'draft'),
   ])
 
   const totalRevenue = (ordersRes.data ?? []).reduce(
@@ -35,12 +39,24 @@ async function getStats() {
     0
   )
 
+  const totalItemCost = (allProductsRes.data ?? []).reduce(
+    (sum: number, p: { purchase_price: number | null }) => sum + (p.purchase_price ?? 0),
+    0
+  )
+
+  const totalPotentialValue = (allProductsRes.data ?? []).reduce(
+    (sum: number, p: { price: number }) => sum + p.price,
+    0
+  )
+
   return {
     activeListings: activeRes.count ?? 0,
     soldListings: soldRes.count ?? 0,
     totalOrders: ordersRes.count ?? 0,
     totalRevenue,
     totalProfit,
+    totalItemCost,
+    totalPotentialValue,
     recentOrders: recentRes.data ?? [],
   }
 }
@@ -52,12 +68,17 @@ export default async function AdminDashboardPage() {
     <div className="space-y-8">
       <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
 
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatsCard label="Active Listings" value={stats.activeListings} icon="🏷️" />
         <StatsCard label="Items Sold" value={stats.soldListings} icon="✅" />
         <StatsCard label="Total Orders" value={stats.totalOrders} icon="📦" />
-        <StatsCard label="Total Revenue" value={formatPrice(stats.totalRevenue)} icon="💰" />
         <StatsCard label="Total Profit" value={formatPrice(stats.totalProfit)} icon="📈" />
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <StatsCard label="Total Item Cost" value={formatPrice(stats.totalItemCost)} icon="🛒" />
+        <StatsCard label="Total Potential Value" value={formatPrice(stats.totalPotentialValue)} icon="💎" />
+        <StatsCard label="Total Revenue" value={formatPrice(stats.totalRevenue)} icon="💰" />
       </div>
 
       <div>
