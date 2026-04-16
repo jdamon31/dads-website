@@ -25,7 +25,7 @@ export function ListingForm({ product }: Props) {
   )
   const [condition, setCondition] = useState(product?.condition ?? 'good')
   const [category, setCategory] = useState(product?.category ?? CATEGORIES[0])
-  const [status, setStatus] = useState<ProductStatus>(product?.status ?? 'draft')
+  const [status, setStatus] = useState<ProductStatus>(product?.status ?? 'active')
   const [fulfillment, setFulfillment] = useState<FulfillmentType>(product?.fulfillment ?? 'both')
   const [imageUrls, setImageUrls] = useState<string[]>(
     product?.images.map((i) => i.url) ?? []
