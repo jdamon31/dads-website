@@ -37,8 +37,11 @@ export function ProductGrid({ products }: ProductGridProps) {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="text-center py-16 text-gray-400">
-          <p className="text-lg">No items found</p>
+        <div className="text-center py-20 text-gray-400">
+          <svg className="w-12 h-12 mx-auto mb-4 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803a7.5 7.5 0 0010.607 0z" />
+          </svg>
+          <p className="font-medium text-gray-600">No items found</p>
           <p className="text-sm mt-1">Try a different search or category</p>
         </div>
       ) : (
