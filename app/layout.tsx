@@ -5,7 +5,7 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Rewind — Quality Goods at Great Prices',
+  title: 'Replay Industrial — Quality Goods at Great Prices',
   description:
     'Handpicked selection of premium tools, electronics, collectibles, furniture, and more. Ship nationwide or pick up locally.',
 }

@@ -17,7 +17,7 @@ export function Navbar() {
             href="/"
             className="text-2xl font-black text-white tracking-tight hover:text-brand-400 transition-colors"
           >
-            REWIND
+            REPLAY INDUSTRIAL
           </Link>
 
           <button
