@@ -28,7 +28,8 @@ export interface Product {
   title: string
   slug: string
   description: string | null
-  price: number // stored in cents
+  price: number // stored in cents (sale price)
+  purchase_price: number | null // stored in cents (what was paid at auction)
   condition: Condition
   category: string
   status: ProductStatus

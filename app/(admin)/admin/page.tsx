@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 async function getStats() {
   const supabase = createAdminClient()
 
-  const [activeRes, soldRes, ordersRes, recentRes] = await Promise.all([
+  const [activeRes, soldRes, ordersRes, recentRes, soldProductsRes] = await Promise.all([
     supabase.from('products').select('id', { count: 'exact', head: true }).eq('status', 'active'),
     supabase.from('products').select('id', { count: 'exact', head: true }).eq('status', 'sold'),
     supabase.from('orders').select('id, total_cents', { count: 'exact' }),
@@ -17,10 +17,21 @@ async function getStats() {
       .select('id, created_at, buyer_name, total_cents, order_status')
       .order('created_at', { ascending: false })
       .limit(5),
+    supabase
+      .from('products')
+      .select('price, purchase_price')
+      .eq('status', 'sold')
+      .not('purchase_price', 'is', null),
   ])
 
   const totalRevenue = (ordersRes.data ?? []).reduce(
     (sum: number, o: { total_cents: number }) => sum + o.total_cents,
+    0
+  )
+
+  const totalProfit = (soldProductsRes.data ?? []).reduce(
+    (sum: number, p: { price: number; purchase_price: number }) =>
+      sum + (p.price - p.purchase_price),
     0
   )
 
@@ -29,6 +40,7 @@ async function getStats() {
     soldListings: soldRes.count ?? 0,
     totalOrders: ordersRes.count ?? 0,
     totalRevenue,
+    totalProfit,
     recentOrders: recentRes.data ?? [],
   }
 }
@@ -40,11 +52,12 @@ export default async function AdminDashboardPage() {
     <div className="space-y-8">
       <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <StatsCard label="Active Listings" value={stats.activeListings} icon="🏷️" />
         <StatsCard label="Items Sold" value={stats.soldListings} icon="✅" />
         <StatsCard label="Total Orders" value={stats.totalOrders} icon="📦" />
         <StatsCard label="Total Revenue" value={formatPrice(stats.totalRevenue)} icon="💰" />
+        <StatsCard label="Total Profit" value={formatPrice(stats.totalProfit)} icon="📈" />
       </div>
 
       <div>

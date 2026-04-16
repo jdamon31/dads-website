@@ -19,7 +19,8 @@ CREATE TABLE products (
   title TEXT NOT NULL,
   slug TEXT NOT NULL UNIQUE,
   description TEXT,
-  price INTEGER NOT NULL CHECK (price > 0),  -- stored in cents
+  price INTEGER NOT NULL CHECK (price > 0),  -- stored in cents (sale price)
+  purchase_price INTEGER,                    -- stored in cents (what was paid at auction)
   condition condition_type NOT NULL,
   category TEXT NOT NULL,
   status product_status NOT NULL DEFAULT 'draft',

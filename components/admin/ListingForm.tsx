@@ -20,6 +20,9 @@ export function ListingForm({ product }: Props) {
   const [title, setTitle] = useState(product?.title ?? '')
   const [description, setDescription] = useState(product?.description ?? '')
   const [price, setPrice] = useState(product ? centsToDollars(product.price) : '')
+  const [purchasePrice, setPurchasePrice] = useState(
+    product?.purchase_price ? centsToDollars(product.purchase_price) : ''
+  )
   const [condition, setCondition] = useState(product?.condition ?? 'good')
   const [category, setCategory] = useState(product?.category ?? CATEGORIES[0])
   const [status, setStatus] = useState<ProductStatus>(product?.status ?? 'draft')
@@ -44,6 +47,7 @@ export function ListingForm({ product }: Props) {
       title: title.trim(),
       description: description.trim() || null,
       price: dollarsTocents(price),
+      purchase_price: purchasePrice ? dollarsTocents(purchasePrice) : null,
       condition,
       category,
       status,
@@ -85,7 +89,7 @@ export function ListingForm({ product }: Props) {
         </div>
 
         <Input
-          label="Price ($)"
+          label="Sale Price ($)"
           type="number"
           min="0.01"
           step="0.01"
@@ -93,6 +97,16 @@ export function ListingForm({ product }: Props) {
           onChange={(e) => setPrice(e.target.value)}
           placeholder="45.00"
           required
+        />
+
+        <Input
+          label="Purchase Price ($)"
+          type="number"
+          min="0"
+          step="0.01"
+          value={purchasePrice}
+          onChange={(e) => setPurchasePrice(e.target.value)}
+          placeholder="12.00"
         />
 
         <Select

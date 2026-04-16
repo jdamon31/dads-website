@@ -24,6 +24,23 @@ async function getProducts(): Promise<ProductWithImages[]> {
   }))
 }
 
+function ProfitCell({ salePrice, purchasePrice }: { salePrice: number; purchasePrice: number | null }) {
+  if (purchasePrice === null) {
+    return <span className="text-gray-300">—</span>
+  }
+  const profit = salePrice - purchasePrice
+  const margin = Math.round((profit / salePrice) * 100)
+  const isPositive = profit >= 0
+  return (
+    <div>
+      <p className={`font-medium ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+        {isPositive ? '+' : ''}{formatPrice(profit)}
+      </p>
+      <p className="text-xs text-gray-400">{margin}% margin</p>
+    </div>
+  )
+}
+
 export default async function ListingsPage() {
   const products = await getProducts()
 
@@ -46,7 +63,7 @@ export default async function ListingsPage() {
           </p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
@@ -57,13 +74,16 @@ export default async function ListingsPage() {
                   Title
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Category
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Condition
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Price
+                  Paid
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Sell For
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Profit
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
@@ -91,12 +111,17 @@ export default async function ListingsPage() {
                   <td className="px-4 py-3 font-medium text-gray-900 max-w-xs truncate">
                     {product.title}
                   </td>
-                  <td className="px-4 py-3 text-gray-500">{product.category}</td>
                   <td className="px-4 py-3">
                     <ConditionBadge condition={product.condition} />
                   </td>
+                  <td className="px-4 py-3 text-gray-600">
+                    {product.purchase_price ? formatPrice(product.purchase_price) : <span className="text-gray-300">—</span>}
+                  </td>
                   <td className="px-4 py-3 font-medium text-gray-900">
                     {formatPrice(product.price)}
+                  </td>
+                  <td className="px-4 py-3">
+                    <ProfitCell salePrice={product.price} purchasePrice={product.purchase_price} />
                   </td>
                   <td className="px-4 py-3 capitalize text-gray-600">{product.status}</td>
                   <td className="px-4 py-3 text-right">
