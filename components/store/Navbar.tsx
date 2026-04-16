@@ -11,18 +11,18 @@ export function Navbar() {
 
   return (
     <>
-      <nav className="sticky top-0 z-30 bg-white border-b border-gray-200">
+      <nav className="sticky top-0 z-30 bg-dark-900 shadow-lg">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link
             href="/"
-            className="text-xl font-bold text-gray-900 hover:text-gray-700"
+            className="text-2xl font-black text-white tracking-tight hover:text-brand-400 transition-colors"
           >
-            Dad&apos;s Store
+            REWIND
           </Link>
 
           <button
             onClick={() => setCartOpen(true)}
-            className="relative p-2 text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100"
+            className="relative p-2 text-slate-300 hover:text-white rounded-lg hover:bg-dark-700 transition-colors"
             aria-label={`Open cart, ${itemCount()} items`}
           >
             <svg
@@ -40,7 +40,7 @@ export function Navbar() {
               />
             </svg>
             {itemCount() > 0 && (
-              <span className="absolute -top-1 -right-1 bg-gray-900 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+              <span className="absolute -top-1 -right-1 bg-brand-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
                 {itemCount()}
               </span>
             )}

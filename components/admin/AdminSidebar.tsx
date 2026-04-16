@@ -18,7 +18,7 @@ export function AdminSidebar() {
     <aside className="w-56 shrink-0 bg-gray-900 text-white flex flex-col min-h-screen">
       <div className="px-5 py-6 border-b border-gray-700">
         <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">Admin</p>
-        <p className="font-bold text-lg">Dad&apos;s Store</p>
+        <p className="font-black text-xl tracking-tight">REWIND</p>
       </div>
 
       <nav className="flex-1 py-4 space-y-0.5 px-2">

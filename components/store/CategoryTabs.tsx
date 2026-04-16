@@ -20,8 +20,8 @@ export function CategoryTabs({ active, onChange }: CategoryTabsProps) {
           className={cn(
             'shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors',
             active === cat
-              ? 'bg-gray-900 text-white'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              ? 'bg-brand-600 text-white'
+              : 'bg-white text-gray-600 border border-gray-200 hover:border-brand-400 hover:text-brand-600'
           )}
         >
           {cat}

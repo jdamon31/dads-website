@@ -5,9 +5,9 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: "Dad's Store — Quality Items at Fair Prices",
+  title: 'Rewind — Quality Goods at Great Prices',
   description:
-    'Browse unique items sourced from auctions. Tools, electronics, collectibles, furniture, and more. Ship or local pickup available.',
+    'Handpicked selection of premium tools, electronics, collectibles, furniture, and more. Ship nationwide or pick up locally.',
 }
 
 export default function RootLayout({
