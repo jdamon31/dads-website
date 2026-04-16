@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { createClient, createAdminClient } from '@/lib/supabase-server'
+import { createStaticClient, createAdminClient } from '@/lib/supabase-server'
 import { generateSlug } from '@/lib/utils'
+import { revalidatePath } from 'next/cache'
 
 // GET /api/products — public, returns active products with images
 export async function GET() {
-  const supabase = createClient()
+  const supabase = createStaticClient()
   const { data, error } = await supabase
     .from('products')
     .select('*, images:product_images(*)')
@@ -28,7 +29,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json()
-  const { title, description, price, condition, category, status, fulfillment, imageUrls } = body
+  const { title, description, price, purchase_price, condition, category, status, fulfillment, imageUrls } = body
 
   if (!title || !price || !condition || !category) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -45,9 +46,10 @@ export async function POST(req: NextRequest) {
       slug,
       description: description ?? null,
       price: Math.round(Number(price)),
+      purchase_price: purchase_price ? Math.round(Number(purchase_price)) : null,
       condition,
       category,
-      status: status ?? 'draft',
+      status: status ?? 'active',
       fulfillment: fulfillment ?? 'both',
     })
     .select()
@@ -66,6 +68,10 @@ export async function POST(req: NextRequest) {
     }))
     await supabase.from('product_images').insert(imageRows)
   }
+
+  // Bust the homepage and the new product's page so they appear immediately
+  revalidatePath('/')
+  revalidatePath(`/products/${slug}`)
 
   return NextResponse.json(product, { status: 201 })
 }

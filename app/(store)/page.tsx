@@ -1,11 +1,11 @@
-import { createClient } from '@/lib/supabase-server'
+import { createStaticClient } from '@/lib/supabase-server'
 import { ProductWithImages } from '@/types'
 import { ProductGrid } from '@/components/store/ProductGrid'
 
 export const revalidate = 60
 
 async function getProducts(): Promise<ProductWithImages[]> {
-  const supabase = createClient()
+  const supabase = createStaticClient()
   const { data, error } = await supabase
     .from('products')
     .select('*, images:product_images(*)')
