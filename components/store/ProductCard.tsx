@@ -17,7 +17,6 @@ export function ProductCard({ product }: { product: ProductWithImages }) {
 
   return (
     <div className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100">
-      {/* Image */}
       <Link href={`/products/${product.slug}`}>
         <div className="relative aspect-square bg-gray-100 overflow-hidden">
           {firstImage ? (
@@ -35,10 +34,14 @@ export function ProductCard({ product }: { product: ProductWithImages }) {
               </svg>
             </div>
           )}
-          {/* Condition badge overlaid on image */}
           {!isSold && (
             <div className="absolute top-2 left-2">
               <ConditionBadge condition={product.condition} />
+            </div>
+          )}
+          {product.is_special && !isSold && (
+            <div className="absolute top-2 right-2 bg-brand-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+              SPECIAL
             </div>
           )}
           {isSold && (
@@ -49,7 +52,6 @@ export function ProductCard({ product }: { product: ProductWithImages }) {
         </div>
       </Link>
 
-      {/* Info */}
       <div className="p-4">
         <p className="text-xs text-brand-600 font-medium uppercase tracking-wide mb-1">{product.category}</p>
         <Link
@@ -60,9 +62,15 @@ export function ProductCard({ product }: { product: ProductWithImages }) {
         </Link>
 
         <div className="flex items-center justify-between gap-2 mt-3">
-          <span className="text-xl font-black text-gray-900">
-            {formatPrice(product.price)}
-          </span>
+          <div>
+            <span className="text-xl font-black text-gray-900">{formatPrice(product.price)}</span>
+            {!isSold && product.quantity > 1 && (
+              <p className="text-xs text-gray-400 mt-0.5">{product.quantity} in stock</p>
+            )}
+            {!isSold && product.quantity === 1 && (
+              <p className="text-xs text-brand-600 font-medium mt-0.5">Last one!</p>
+            )}
+          </div>
           <Button
             size="sm"
             disabled={isSold || inCart}

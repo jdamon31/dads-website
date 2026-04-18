@@ -1,10 +1,11 @@
 import { createServiceClient } from '@/lib/supabase-server'
 import { ProductWithImages } from '@/types'
 import { ProductGrid } from '@/components/store/ProductGrid'
+import { FeaturedSection } from '@/components/store/FeaturedSection'
 
 export const dynamic = 'force-dynamic'
 
-async function getProducts(): Promise<ProductWithImages[]> {
+async function getProducts(): Promise<{ specials: ProductWithImages[]; rest: ProductWithImages[] }> {
   const supabase = createServiceClient()
   const { data, error } = await supabase
     .from('products')
@@ -14,20 +15,25 @@ async function getProducts(): Promise<ProductWithImages[]> {
 
   if (error) {
     console.error('Failed to fetch products:', error)
-    return []
+    return { specials: [], rest: [] }
   }
 
-  return (data ?? []).map((p) => ({
+  const products: ProductWithImages[] = (data ?? []).map((p) => ({
     ...p,
     images: (p.images ?? []).sort(
       (a: { display_order: number }, b: { display_order: number }) =>
         a.display_order - b.display_order
     ),
   }))
+
+  return {
+    specials: products.filter((p) => p.is_special),
+    rest: products.filter((p) => !p.is_special),
+  }
 }
 
 export default async function HomePage() {
-  const products = await getProducts()
+  const { specials, rest } = await getProducts()
 
   return (
     <>
@@ -69,9 +75,12 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Catalog */}
+      {/* Featured specials */}
+      <FeaturedSection products={specials} />
+
+      {/* Main catalog */}
       <div className="max-w-6xl mx-auto px-4 py-10">
-        <ProductGrid products={products} />
+        <ProductGrid products={rest} />
       </div>
     </>
   )

@@ -72,13 +72,24 @@ export default async function ProductPage({ params }: Props) {
             </div>
           </div>
 
-          <p className="text-4xl font-black text-gray-900">
-            {formatPrice(product.price)}
-          </p>
+          <div className="flex items-baseline gap-4">
+            <p className="text-4xl font-black text-gray-900">
+              {formatPrice(product.price)}
+            </p>
+            {!isSold && product.quantity === 1 && (
+              <span className="text-sm font-semibold text-brand-600">Last one!</span>
+            )}
+            {!isSold && product.quantity > 1 && (
+              <span className="text-sm text-gray-500">{product.quantity} in stock</span>
+            )}
+          </div>
 
           <div className="flex items-center gap-3 flex-wrap">
             <ConditionBadge condition={product.condition} />
             <FulfillmentBadge fulfillment={product.fulfillment} />
+            {product.is_special && !isSold && (
+              <span className="bg-brand-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">⭐ Featured Special</span>
+            )}
           </div>
 
           {product.description && (

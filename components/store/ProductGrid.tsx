@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { ProductWithImages } from '@/types'
+import { useState, useMemo, useEffect } from 'react'
+import { ProductWithImages, Category } from '@/types'
 import { ProductCard } from './ProductCard'
 import { SearchBar } from './SearchBar'
 import { CategoryTabs } from './CategoryTabs'
@@ -13,6 +13,14 @@ interface ProductGridProps {
 export function ProductGrid({ products }: ProductGridProps) {
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('All')
+  const [categories, setCategories] = useState<Category[]>([])
+
+  useEffect(() => {
+    fetch('/api/categories')
+      .then((r) => r.json())
+      .then(setCategories)
+      .catch(() => {})
+  }, [])
 
   const filtered = useMemo(() => {
     return products.filter((p) => {
@@ -32,7 +40,7 @@ export function ProductGrid({ products }: ProductGridProps) {
           <SearchBar value={search} onChange={setSearch} />
         </div>
         <div className="flex-1 overflow-hidden">
-          <CategoryTabs active={category} onChange={setCategory} />
+          <CategoryTabs active={category} onChange={setCategory} categories={categories} />
         </div>
       </div>
 

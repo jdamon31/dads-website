@@ -1,12 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { Button } from '@/components/ui/Button'
 import { ImageUploader } from './ImageUploader'
-import { CATEGORIES, CONDITIONS, ProductWithImages, FulfillmentType, ProductStatus } from '@/types'
+import { Category, CONDITIONS, ProductWithImages, FulfillmentType, ProductStatus } from '@/types'
 import { centsToDollars, dollarsTocents } from '@/lib/utils'
 
 interface Props {
@@ -24,14 +24,28 @@ export function ListingForm({ product }: Props) {
     product?.purchase_price ? centsToDollars(product.purchase_price) : ''
   )
   const [condition, setCondition] = useState(product?.condition ?? 'good')
-  const [category, setCategory] = useState(product?.category ?? CATEGORIES[0])
+  const [category, setCategory] = useState(product?.category ?? '')
   const [status, setStatus] = useState<ProductStatus>(product?.status ?? 'active')
   const [fulfillment, setFulfillment] = useState<FulfillmentType>(product?.fulfillment ?? 'both')
+  const [isSpecial, setIsSpecial] = useState(product?.is_special ?? false)
+  const [quantity, setQuantity] = useState(product?.quantity ?? 1)
   const [imageUrls, setImageUrls] = useState<string[]>(
     product?.images.map((i) => i.url) ?? []
   )
+  const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetch('/api/categories')
+      .then((r) => r.json())
+      .then((data: Category[]) => {
+        setCategories(data)
+        if (!isEdit && data.length > 0 && !category) {
+          setCategory(data[0].name)
+        }
+      })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -52,6 +66,8 @@ export function ListingForm({ product }: Props) {
       category,
       status,
       fulfillment,
+      is_special: isSpecial,
+      quantity: Number(quantity),
       imageUrls,
     }
 
@@ -109,6 +125,16 @@ export function ListingForm({ product }: Props) {
           placeholder="12.00"
         />
 
+        <Input
+          label="Quantity"
+          type="number"
+          min="1"
+          step="1"
+          value={quantity}
+          onChange={(e) => setQuantity(Number(e.target.value))}
+          placeholder="1"
+        />
+
         <Select
           label="Condition"
           value={condition}
@@ -120,7 +146,7 @@ export function ListingForm({ product }: Props) {
           label="Category"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          options={CATEGORIES.map((c) => ({ value: c, label: c }))}
+          options={categories.map((c) => ({ value: c.name, label: c.name }))}
         />
 
         <Select
@@ -128,11 +154,34 @@ export function ListingForm({ product }: Props) {
           value={status}
           onChange={(e) => setStatus(e.target.value as ProductStatus)}
           options={[
-            { value: 'draft', label: 'Draft' },
             { value: 'active', label: 'Active' },
+            { value: 'draft', label: 'Draft' },
             { value: 'sold', label: 'Sold' },
           ]}
         />
+
+        {/* Special toggle */}
+        <div className="flex items-center justify-between bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
+          <div>
+            <p className="text-sm font-medium text-gray-900">Featured Special</p>
+            <p className="text-xs text-gray-500">Show in the Featured Deals section</p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={isSpecial}
+            onClick={() => setIsSpecial(!isSpecial)}
+            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 ${
+              isSpecial ? 'bg-brand-600' : 'bg-gray-200'
+            }`}
+          >
+            <span
+              className={`inline-block h-5 w-5 rounded-full bg-white shadow transform transition-transform ${
+                isSpecial ? 'translate-x-5' : 'translate-x-0'
+              }`}
+            />
+          </button>
+        </div>
 
         <div className="sm:col-span-2">
           <p className="text-sm font-medium text-gray-700 mb-2">Fulfillment</p>

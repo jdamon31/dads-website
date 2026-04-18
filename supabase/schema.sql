@@ -12,6 +12,32 @@ CREATE TYPE payment_status_type AS ENUM ('pending', 'paid', 'failed', 'refunded'
 CREATE TYPE order_status_type AS ENUM ('pending', 'processing', 'shipped', 'complete', 'cancelled');
 
 -- ============================================================
+-- Categories
+-- ============================================================
+CREATE TABLE categories (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL UNIQUE,
+  slug TEXT NOT NULL UNIQUE,
+  display_order INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_categories_display_order ON categories(display_order);
+
+ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public can view categories" ON categories FOR SELECT USING (true);
+
+-- Seed default categories
+INSERT INTO categories (name, slug, display_order) VALUES
+  ('Tools', 'tools', 0),
+  ('Electronics', 'electronics', 1),
+  ('Collectibles', 'collectibles', 2),
+  ('Furniture', 'furniture', 3),
+  ('Kitchen', 'kitchen', 4),
+  ('Clothing', 'clothing', 5),
+  ('Other', 'other', 6);
+
+-- ============================================================
 -- Products
 -- ============================================================
 CREATE TABLE products (
@@ -25,12 +51,15 @@ CREATE TABLE products (
   category TEXT NOT NULL,
   status product_status NOT NULL DEFAULT 'draft',
   fulfillment fulfillment_type NOT NULL DEFAULT 'both',
+  is_special BOOLEAN NOT NULL DEFAULT false,
+  quantity INTEGER NOT NULL DEFAULT 1,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE INDEX idx_products_status ON products(status);
 CREATE INDEX idx_products_category ON products(category);
 CREATE INDEX idx_products_slug ON products(slug);
+CREATE INDEX idx_products_is_special ON products(is_special);
 
 -- ============================================================
 -- Product Images
@@ -80,12 +109,51 @@ CREATE INDEX idx_order_items_order_id ON order_items(order_id);
 CREATE INDEX idx_order_items_product_id ON order_items(product_id);
 
 -- ============================================================
--- Trigger: Mark product as sold when an order item is created
+-- Contact Messages
+-- ============================================================
+CREATE TABLE contact_messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  message TEXT NOT NULL,
+  read BOOLEAN NOT NULL DEFAULT false,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_contact_messages_created_at ON contact_messages(created_at DESC);
+
+ALTER TABLE contact_messages ENABLE ROW LEVEL SECURITY;
+-- No public SELECT; all access via service role in API routes
+
+-- ============================================================
+-- Item Requests
+-- ============================================================
+CREATE TABLE item_requests (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  phone TEXT,
+  description TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_item_requests_created_at ON item_requests(created_at DESC);
+
+ALTER TABLE item_requests ENABLE ROW LEVEL SECURITY;
+-- No public SELECT; all access via service role in API routes
+
+-- ============================================================
+-- Trigger: Decrement quantity and mark sold when qty hits 0
 -- ============================================================
 CREATE OR REPLACE FUNCTION mark_product_sold()
 RETURNS TRIGGER AS $$
 BEGIN
-  UPDATE products SET status = 'sold' WHERE id = NEW.product_id;
+  UPDATE products
+  SET
+    quantity = GREATEST(quantity - 1, 0),
+    status = CASE WHEN quantity <= 1 THEN 'sold' ELSE status END
+  WHERE id = NEW.product_id;
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;

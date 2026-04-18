@@ -9,6 +9,8 @@ const navItems = [
   { href: '/admin', label: 'Dashboard', icon: '📊', exact: true },
   { href: '/admin/listings', label: 'Listings', icon: '🏷️', exact: false },
   { href: '/admin/orders', label: 'Orders', icon: '📦', exact: false },
+  { href: '/admin/messages', label: 'Messages', icon: '📬', exact: false },
+  { href: '/admin/categories', label: 'Categories', icon: '🗂️', exact: false },
 ]
 
 export function AdminSidebar() {

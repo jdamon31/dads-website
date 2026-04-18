@@ -4,17 +4,7 @@ export type FulfillmentType = 'ship' | 'pickup' | 'both'
 export type PaymentMethod = 'stripe' | 'paypal'
 export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded'
 export type OrderStatus = 'pending' | 'processing' | 'shipped' | 'complete' | 'cancelled'
-
-export const CATEGORIES = [
-  'Tools',
-  'Electronics',
-  'Collectibles',
-  'Furniture',
-  'Kitchen',
-  'Clothing',
-  'Other',
-] as const
-export type Category = (typeof CATEGORIES)[number]
+export type RequestStatus = 'pending' | 'fulfilled' | 'dismissed'
 
 export const CONDITIONS: { value: Condition; label: string }[] = [
   { value: 'excellent', label: 'Excellent' },
@@ -22,6 +12,14 @@ export const CONDITIONS: { value: Condition; label: string }[] = [
   { value: 'fair', label: 'Fair' },
   { value: 'parts', label: 'Parts Only' },
 ]
+
+export interface Category {
+  id: string
+  name: string
+  slug: string
+  display_order: number
+  created_at: string
+}
 
 export interface Product {
   id: string
@@ -34,6 +32,8 @@ export interface Product {
   category: string
   status: ProductStatus
   fulfillment: FulfillmentType
+  is_special: boolean
+  quantity: number
   created_at: string
 }
 
@@ -86,4 +86,23 @@ export interface OrderWithItems extends Order {
 export interface CartItem {
   product: ProductWithImages
   addedAt: number
+}
+
+export interface ContactMessage {
+  id: string
+  name: string
+  email: string
+  message: string
+  read: boolean
+  created_at: string
+}
+
+export interface ItemRequest {
+  id: string
+  name: string
+  email: string
+  phone: string | null
+  description: string
+  status: RequestStatus
+  created_at: string
 }
