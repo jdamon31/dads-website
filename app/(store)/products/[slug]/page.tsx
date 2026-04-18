@@ -88,6 +88,9 @@ export default async function ProductPage({ params }: Props) {
           <div className="flex items-center gap-3 flex-wrap">
             <ConditionBadge condition={product.condition} />
             <FulfillmentBadge fulfillment={product.fulfillment} />
+            {product.fulfillment !== 'ship' && !isSold && (
+              <span className="text-xs text-gray-500">📍 Pickup · Reno, NV 89509</span>
+            )}
             {product.is_special && !isSold && (
               <span className="bg-brand-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">⭐ Featured Special</span>
             )}

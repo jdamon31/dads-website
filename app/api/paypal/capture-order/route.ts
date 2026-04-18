@@ -11,6 +11,7 @@ export async function POST(req: NextRequest) {
     buyerPhone,
     fulfillmentType,
     shippingAddress,
+    pickupNotes,
     productIds,
     totalCents,
   } = await req.json()
@@ -57,7 +58,9 @@ export async function POST(req: NextRequest) {
       buyer_email: buyerEmail,
       buyer_phone: buyerPhone ?? null,
       fulfillment_type: fulfillmentType,
-      shipping_address: shippingAddress ?? null,
+      shipping_address: fulfillmentType === 'pickup'
+        ? (pickupNotes ? { notes: pickupNotes } : null)
+        : (shippingAddress ?? null),
       payment_method: 'paypal',
       payment_intent_id: captureId,
       payment_status: 'paid',

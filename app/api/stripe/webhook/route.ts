@@ -113,9 +113,11 @@ export async function POST(req: NextRequest) {
   const productIds: string[] = JSON.parse(meta.cartItemIds ?? '[]')
   const buyerName = meta.buyerName ?? 'Unknown'
   const buyerEmail = meta.buyerEmail ?? ''
-  const buyerPhone = meta.buyerPhone ?? null
+  const buyerPhone = meta.buyerPhone || null
   const fulfillmentType = (meta.fulfillmentType ?? 'ship') as 'ship' | 'pickup'
-  const shippingAddress = meta.shippingAddress ? JSON.parse(meta.shippingAddress) : null
+  const shippingAddress = fulfillmentType === 'pickup'
+    ? (meta.pickupNotes ? { notes: meta.pickupNotes } : null)
+    : (meta.shippingAddress ? JSON.parse(meta.shippingAddress) : null)
 
   if (productIds.length === 0) {
     console.error('Stripe webhook: no productIds in metadata for PI', paymentIntent.id)

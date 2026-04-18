@@ -20,12 +20,15 @@ import { ShippingAddress } from '@/types'
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
 
 // ── Inner form that uses Stripe hooks ─────────────────────────────────────────
+const PICKUP_ZIP = '89509'
+
 interface CheckoutFormData {
   buyerName: string
   buyerEmail: string
   buyerPhone: string
   fulfillmentType: 'ship' | 'pickup'
   shippingAddress: ShippingAddress
+  pickupNotes: string
 }
 
 function StripeCheckoutForm({
@@ -54,12 +57,12 @@ function StripeCheckoutForm({
     setError(null)
 
     // Update PaymentIntent metadata before confirming
+    const paymentIntentId = clientSecret.split('_secret_')[0]
     await fetch('/api/stripe/create-payment-intent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        totalCents,
-        cartItems: productIds.map((id) => ({ product: { id } })),
+        paymentIntentId,
         buyerName: formData.buyerName,
         buyerEmail: formData.buyerEmail,
         buyerPhone: formData.buyerPhone,
@@ -68,6 +71,7 @@ function StripeCheckoutForm({
           formData.fulfillmentType === 'ship'
             ? JSON.stringify(formData.shippingAddress)
             : null,
+        pickupNotes: formData.pickupNotes || null,
       }),
     })
 
@@ -135,6 +139,7 @@ export default function CheckoutPage() {
     buyerPhone: '',
     fulfillmentType: 'ship',
     shippingAddress: { line1: '', line2: '', city: '', state: '', zip: '' },
+    pickupNotes: '',
   })
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({})
 
@@ -241,6 +246,24 @@ export default function CheckoutPage() {
                 </label>
               ))}
             </div>
+
+            {formData.fulfillmentType === 'pickup' && (
+              <div className="rounded-lg bg-blue-50 border border-blue-100 px-4 py-3 space-y-3">
+                <p className="text-sm text-blue-800">
+                  <span className="font-semibold">📍 Pickup location:</span> Reno, NV {PICKUP_ZIP} — we&apos;ll email you to coordinate a time after your order is placed.
+                </p>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 block mb-1">Preferred pickup day / time (optional)</label>
+                  <textarea
+                    value={formData.pickupNotes}
+                    onChange={(e) => setFormData((f) => ({ ...f, pickupNotes: e.target.value }))}
+                    rows={2}
+                    placeholder="e.g. Weekday afternoons, Saturday mornings..."
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none"
+                  />
+                </div>
+              </div>
+            )}
 
             {formData.fulfillmentType === 'ship' && (
               <div className="space-y-3 pt-1">
@@ -371,6 +394,7 @@ export default function CheckoutPage() {
                           formData.fulfillmentType === 'ship'
                             ? formData.shippingAddress
                             : null,
+                        pickupNotes: formData.pickupNotes || null,
                         productIds,
                         totalCents,
                       }),

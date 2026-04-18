@@ -2,8 +2,34 @@ import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 
 export async function POST(req: NextRequest) {
-  const { totalCents, cartItems } = await req.json()
+  const {
+    totalCents,
+    cartItems,
+    paymentIntentId,
+    buyerName,
+    buyerEmail,
+    buyerPhone,
+    fulfillmentType,
+    shippingAddress,
+    pickupNotes,
+  } = await req.json()
 
+  // Update existing PI with buyer metadata (called before card confirmation)
+  if (paymentIntentId) {
+    const updated = await stripe.paymentIntents.update(paymentIntentId, {
+      metadata: {
+        buyerName: buyerName ?? '',
+        buyerEmail: buyerEmail ?? '',
+        buyerPhone: buyerPhone ?? '',
+        fulfillmentType: fulfillmentType ?? 'ship',
+        shippingAddress: shippingAddress ?? '',
+        pickupNotes: pickupNotes ?? '',
+      },
+    })
+    return NextResponse.json({ clientSecret: updated.client_secret })
+  }
+
+  // Create new PI (initial load)
   if (!totalCents || totalCents < 50) {
     return NextResponse.json({ error: 'Invalid amount' }, { status: 400 })
   }
