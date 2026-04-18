@@ -34,6 +34,7 @@ export interface Product {
   fulfillment: FulfillmentType
   is_special: boolean
   quantity: number
+  offers_enabled: boolean
   created_at: string
 }
 
@@ -95,6 +96,24 @@ export interface ContactMessage {
   message: string
   read: boolean
   created_at: string
+}
+
+export type OfferStatus = 'pending' | 'accepted' | 'countered' | 'declined' | 'paid'
+
+export interface Offer {
+  id: string
+  product_id: string
+  buyer_name: string
+  buyer_email: string
+  buyer_phone: string | null
+  offer_amount_cents: number
+  message: string | null
+  status: OfferStatus
+  counter_amount_cents: number | null
+  counter_message: string | null
+  checkout_session_id: string | null
+  created_at: string
+  product?: { title: string; slug: string }
 }
 
 export interface ItemRequest {

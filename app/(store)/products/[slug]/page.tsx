@@ -8,6 +8,7 @@ import { ConditionBadge } from '@/components/store/ConditionBadge'
 import { FulfillmentBadge } from '@/components/store/FulfillmentBadge'
 import { Badge } from '@/components/ui/Badge'
 import { AddToCartButton } from './AddToCartButton'
+import { OfferForm } from './OfferForm'
 
 export const revalidate = 60
 
@@ -101,8 +102,11 @@ export default async function ProductPage({ params }: Props) {
             </div>
           )}
 
-          <div className="pt-2">
+          <div className="pt-2 space-y-3">
             <AddToCartButton product={product} isSold={isSold} />
+            {!isSold && product.offers_enabled && (
+              <OfferForm productId={product.id} productTitle={product.title} />
+            )}
           </div>
 
           {/* Trust signals */}

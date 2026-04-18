@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
-import { createAdminClient } from '@/lib/supabase-server'
+import { createServiceClient } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
 import Stripe from 'stripe'
 
@@ -26,12 +26,80 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
   }
 
+  const supabase = createServiceClient()
+
+  // ── Offer payment via Checkout Session ──────────────────────────
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object as Stripe.Checkout.Session
+    const meta = session.metadata ?? {}
+    const offerId = meta.offerId
+    const productId = meta.productId
+
+    if (!offerId || !productId) return NextResponse.json({ received: true })
+
+    // Prevent duplicate
+    const { data: existing } = await supabase
+      .from('orders')
+      .select('id')
+      .eq('payment_intent_id', session.payment_intent as string)
+      .single()
+
+    if (existing) return NextResponse.json({ received: true })
+
+    const { data: product } = await supabase
+      .from('products')
+      .select('id, price, slug')
+      .eq('id', productId)
+      .single()
+
+    if (!product) return NextResponse.json({ received: true })
+
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .insert({
+        buyer_name: meta.buyerName ?? 'Unknown',
+        buyer_email: meta.buyerEmail ?? '',
+        buyer_phone: meta.buyerPhone || null,
+        fulfillment_type: 'ship',
+        shipping_address: null,
+        payment_method: 'stripe',
+        payment_intent_id: session.payment_intent as string,
+        payment_status: 'paid',
+        order_status: 'pending',
+        total_cents: session.amount_total ?? 0,
+      })
+      .select()
+      .single()
+
+    if (orderError || !order) {
+      console.error('Webhook: failed to create order for offer:', orderError)
+      return NextResponse.json({ error: 'Order creation failed' }, { status: 500 })
+    }
+
+    await supabase.from('order_items').insert({
+      order_id: order.id,
+      product_id: productId,
+      price_at_purchase_cents: session.amount_total ?? 0,
+    })
+
+    // Mark offer as paid
+    await supabase.from('offers').update({ status: 'paid' }).eq('id', offerId)
+
+    revalidatePath(`/products/${product.slug}`)
+    revalidatePath('/')
+    return NextResponse.json({ received: true })
+  }
+
+  // ── Regular cart payment via PaymentIntent ───────────────────────
   if (event.type !== 'payment_intent.succeeded') {
     return NextResponse.json({ received: true })
   }
 
   const paymentIntent = event.data.object as Stripe.PaymentIntent
-  const supabase = createAdminClient()
+  const meta = paymentIntent.metadata ?? {}
+
+  // Skip if this PI belongs to a Checkout Session (offer payment — handled above)
+  if (meta.offerId) return NextResponse.json({ received: true })
 
   // Prevent duplicate order creation
   const { data: existing } = await supabase
@@ -40,12 +108,8 @@ export async function POST(req: NextRequest) {
     .eq('payment_intent_id', paymentIntent.id)
     .single()
 
-  if (existing) {
-    return NextResponse.json({ received: true })
-  }
+  if (existing) return NextResponse.json({ received: true })
 
-  // Extract metadata stored at PaymentIntent creation time
-  const meta = paymentIntent.metadata ?? {}
   const productIds: string[] = JSON.parse(meta.cartItemIds ?? '[]')
   const buyerName = meta.buyerName ?? 'Unknown'
   const buyerEmail = meta.buyerEmail ?? ''
@@ -58,7 +122,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true })
   }
 
-  // Fetch current prices from DB
   const { data: products } = await supabase
     .from('products')
     .select('id, price, slug')
@@ -69,7 +132,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true })
   }
 
-  // Create order
   const { data: order, error: orderError } = await supabase
     .from('orders')
     .insert({
@@ -92,7 +154,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Order creation failed' }, { status: 500 })
   }
 
-  // Create order items (DB trigger marks products as sold)
   await supabase.from('order_items').insert(
     products.map((p) => ({
       order_id: order.id,
@@ -101,7 +162,6 @@ export async function POST(req: NextRequest) {
     }))
   )
 
-  // Revalidate product pages so storefront shows "Sold"
   for (const p of products) {
     revalidatePath(`/products/${p.slug}`)
   }

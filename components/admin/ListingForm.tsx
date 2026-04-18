@@ -28,6 +28,7 @@ export function ListingForm({ product }: Props) {
   const [status, setStatus] = useState<ProductStatus>(product?.status ?? 'active')
   const [fulfillment, setFulfillment] = useState<FulfillmentType>(product?.fulfillment ?? 'both')
   const [isSpecial, setIsSpecial] = useState(product?.is_special ?? false)
+  const [offersEnabled, setOffersEnabled] = useState(product?.offers_enabled ?? false)
   const [quantity, setQuantity] = useState(product?.quantity ?? 1)
   const [imageUrls, setImageUrls] = useState<string[]>(
     product?.images.map((i) => i.url) ?? []
@@ -67,6 +68,7 @@ export function ListingForm({ product }: Props) {
       status,
       fulfillment,
       is_special: isSpecial,
+      offers_enabled: offersEnabled,
       quantity: Number(quantity),
       imageUrls,
     }
@@ -178,6 +180,29 @@ export function ListingForm({ product }: Props) {
             <span
               className={`inline-block h-5 w-5 rounded-full bg-white shadow transform transition-transform ${
                 isSpecial ? 'translate-x-5' : 'translate-x-0'
+              }`}
+            />
+          </button>
+        </div>
+
+        {/* Offers toggle */}
+        <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg px-4 py-3">
+          <div>
+            <p className="text-sm font-medium text-gray-900">Accept Offers</p>
+            <p className="text-xs text-gray-500">Let buyers submit price offers</p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={offersEnabled}
+            onClick={() => setOffersEnabled(!offersEnabled)}
+            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 ${
+              offersEnabled ? 'bg-brand-600' : 'bg-gray-200'
+            }`}
+          >
+            <span
+              className={`inline-block h-5 w-5 rounded-full bg-white shadow transform transition-transform ${
+                offersEnabled ? 'translate-x-5' : 'translate-x-0'
               }`}
             />
           </button>
