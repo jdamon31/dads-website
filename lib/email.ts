@@ -1,15 +1,8 @@
-import nodemailer from 'nodemailer'
+import { Resend } from 'resend'
 
-function getTransporter() {
-  return nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.GMAIL_USER,
-      pass: process.env.GMAIL_APP_PASSWORD,
-    },
-  })
-}
+const resend = new Resend(process.env.RESEND_API_KEY)
 
+const FROM = 'Replay Industrial <onboarding@resend.dev>'
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? 'jonnydamon31@gmail.com'
 
 export async function sendContactEmail({
@@ -21,9 +14,8 @@ export async function sendContactEmail({
   email: string
   message: string
 }) {
-  const transporter = getTransporter()
-  await transporter.sendMail({
-    from: `"Replay Industrial" <${process.env.GMAIL_USER}>`,
+  await resend.emails.send({
+    from: FROM,
     to: ADMIN_EMAIL,
     subject: `New Message from ${name}`,
     html: `
@@ -53,9 +45,8 @@ export async function sendItemRequestEmail({
   phone?: string | null
   description: string
 }) {
-  const transporter = getTransporter()
-  await transporter.sendMail({
-    from: `"Replay Industrial" <${process.env.GMAIL_USER}>`,
+  await resend.emails.send({
+    from: FROM,
     to: ADMIN_EMAIL,
     subject: `Item Request from ${name}`,
     html: `
@@ -85,9 +76,8 @@ export async function sendRequestFulfilledEmail({
   email: string
   description: string
 }) {
-  const transporter = getTransporter()
-  await transporter.sendMail({
-    from: `"Replay Industrial" <${process.env.GMAIL_USER}>`,
+  await resend.emails.send({
+    from: FROM,
     to: email,
     subject: `Good news — we found what you're looking for!`,
     html: `
