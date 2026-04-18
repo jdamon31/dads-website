@@ -34,7 +34,7 @@ function ContactForm() {
     return (
       <div className="bg-green-50 border border-green-200 rounded-xl p-6 text-center">
         <p className="text-green-800 font-semibold">Message sent!</p>
-        <p className="text-green-700 text-sm mt-1">We'll get back to you as soon as possible.</p>
+        <p className="text-green-700 text-sm mt-1">We&apos;ll get back to you as soon as possible.</p>
         <button onClick={() => setState('idle')} className="mt-3 text-sm text-green-600 underline">
           Send another message
         </button>
@@ -95,7 +95,7 @@ function RequestForm() {
     return (
       <div className="bg-green-50 border border-green-200 rounded-xl p-6 text-center">
         <p className="text-green-800 font-semibold">Request submitted!</p>
-        <p className="text-green-700 text-sm mt-1">We'll reach out as soon as we track it down.</p>
+        <p className="text-green-700 text-sm mt-1">We&apos;ll reach out as soon as we track it down.</p>
         <button onClick={() => setState('idle')} className="mt-3 text-sm text-green-600 underline">
           Submit another request
         </button>
@@ -147,7 +147,7 @@ export default function ContactPage() {
       <section>
         <div className="mb-6">
           <h2 className="text-3xl font-black text-gray-900">Request an Item</h2>
-          <p className="text-gray-500 mt-2">Don't see what you're looking for? Tell us what you need and we'll try to source it.</p>
+          <p className="text-gray-500 mt-2">Don&apos;t see what you&apos;re looking for? Tell us what you need and we&apos;ll try to source it.</p>
         </div>
         <div className="bg-white rounded-2xl border border-gray-200 p-6 sm:p-8">
           <RequestForm />
