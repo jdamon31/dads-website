@@ -131,11 +131,11 @@ function RequestForm() {
 
 export default function ContactPage() {
   return (
-    <div className="max-w-3xl mx-auto px-4 py-12 space-y-16">
+    <div className="max-w-3xl mx-auto px-4 py-8 sm:py-12 space-y-10 sm:space-y-16">
       {/* Contact */}
       <section>
         <div className="mb-6">
-          <h1 className="text-3xl font-black text-gray-900">Get in Touch</h1>
+          <h1 className="text-2xl sm:text-3xl font-black text-gray-900">Get in Touch</h1>
           <p className="text-gray-500 mt-2">Have a question about an item or need help with an order? Send us a message.</p>
         </div>
         <div className="bg-white rounded-2xl border border-gray-200 p-6 sm:p-8">
@@ -146,7 +146,7 @@ export default function ContactPage() {
       {/* Request */}
       <section>
         <div className="mb-6">
-          <h2 className="text-3xl font-black text-gray-900">Request an Item</h2>
+          <h2 className="text-2xl sm:text-3xl font-black text-gray-900">Request an Item</h2>
           <p className="text-gray-500 mt-2">Don&apos;t see what you&apos;re looking for? Tell us what you need and we&apos;ll try to source it.</p>
         </div>
         <div className="bg-white rounded-2xl border border-gray-200 p-6 sm:p-8">

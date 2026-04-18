@@ -39,14 +39,13 @@ export default async function HomePage() {
     <>
       {/* Hero */}
       <section className="bg-dark-900 text-white">
-        <div className="max-w-6xl mx-auto px-4 py-16 sm:py-20">
+        <div className="max-w-6xl mx-auto px-4 py-10 sm:py-16 md:py-20">
           <div className="max-w-2xl">
             <p className="text-brand-400 font-semibold text-sm uppercase tracking-widest mb-3">
               Handpicked Selection
             </p>
             <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
-              Quality Goods at<br />
-              <span className="text-brand-500">Great Prices.</span>
+              Quality Goods at <span className="text-brand-500">Great Prices.</span>
             </h1>
             <p className="text-slate-400 text-lg leading-relaxed">
               Premium tools, electronics, collectibles, and more — carefully selected and ready to ship or pick up locally.

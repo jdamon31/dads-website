@@ -184,9 +184,9 @@ export default function CheckoutPage() {
     <div className="max-w-4xl mx-auto px-4 py-10">
       <h1 className="text-2xl font-bold text-gray-900 mb-8">Checkout</h1>
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-10">
         {/* Form */}
-        <div className="lg:col-span-3 space-y-6">
+        <div className="lg:col-span-3 space-y-6 order-last lg:order-first">
           {/* Contact */}
           <section className="space-y-4">
             <h2 className="text-lg font-semibold text-gray-900">Contact Info</h2>
@@ -221,7 +221,7 @@ export default function CheckoutPage() {
               {(['ship', 'pickup'] as const).map((opt) => (
                 <label
                   key={opt}
-                  className={`flex-1 border-2 rounded-lg px-4 py-3 cursor-pointer transition-colors ${
+                  className={`flex-1 border-2 rounded-lg px-2 sm:px-4 py-3 cursor-pointer transition-colors ${
                     formData.fulfillmentType === opt
                       ? 'border-gray-900 bg-gray-50'
                       : 'border-gray-200 hover:border-gray-300'
@@ -266,8 +266,8 @@ export default function CheckoutPage() {
                     }))
                   }
                 />
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="col-span-1">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
                     <Input
                       label="City"
                       value={formData.shippingAddress.city}
@@ -318,7 +318,7 @@ export default function CheckoutPage() {
                   key={method}
                   type="button"
                   onClick={() => setPaymentMethod(method)}
-                  className={`flex-1 border-2 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
+                  className={`flex-1 border-2 rounded-lg px-2 sm:px-4 py-3 text-sm font-medium transition-colors ${
                     paymentMethod === method
                       ? 'border-gray-900 bg-gray-50'
                       : 'border-gray-200 hover:border-gray-300'
@@ -391,8 +391,8 @@ export default function CheckoutPage() {
         </div>
 
         {/* Order summary */}
-        <div className="lg:col-span-2">
-          <div className="sticky top-24 bg-gray-50 rounded-xl p-5 space-y-4">
+        <div className="lg:col-span-2 order-first lg:order-last">
+          <div className="lg:sticky lg:top-24 bg-gray-50 rounded-xl p-5 space-y-4">
             <h2 className="text-lg font-semibold text-gray-900">Order Summary</h2>
             <div className="space-y-3 divide-y divide-gray-200">
               {items.map((item) => (

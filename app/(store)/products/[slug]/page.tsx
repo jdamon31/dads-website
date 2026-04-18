@@ -55,7 +55,7 @@ export default async function ProductPage({ params }: Props) {
         Back to Shop
       </Link>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-10">
         {/* Images */}
         <ImageGallery images={product.images} title={product.title} />
 
@@ -66,7 +66,7 @@ export default async function ProductPage({ params }: Props) {
               {product.category}
             </p>
             <div className="flex items-start gap-3 flex-wrap">
-              <h1 className="text-2xl font-bold text-gray-900 flex-1 leading-tight">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 flex-1 leading-tight">
                 {product.title}
               </h1>
               {isSold && <Badge variant="sold">SOLD</Badge>}
@@ -74,7 +74,7 @@ export default async function ProductPage({ params }: Props) {
           </div>
 
           <div className="flex items-baseline gap-4">
-            <p className="text-4xl font-black text-gray-900">
+            <p className="text-3xl sm:text-4xl font-black text-gray-900">
               {formatPrice(product.price)}
             </p>
             {!isSold && product.quantity === 1 && (

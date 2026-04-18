@@ -19,7 +19,7 @@ export function CategoryTabs({ active, onChange, categories }: CategoryTabsProps
           key={cat.id}
           onClick={() => onChange(cat.name)}
           className={cn(
-            'shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors',
+            'shrink-0 px-4 py-2.5 rounded-full text-sm font-medium transition-colors',
             active === cat.name
               ? 'bg-brand-600 text-white'
               : 'bg-white text-gray-600 border border-gray-200 hover:border-brand-400 hover:text-brand-600'
