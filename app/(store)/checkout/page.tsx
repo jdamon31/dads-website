@@ -174,6 +174,9 @@ export default function CheckoutPage() {
       if (!formData.shippingAddress.state) e.state = 'State is required'
       if (!formData.shippingAddress.zip) e.zip = 'ZIP is required'
     }
+    if (formData.fulfillmentType === 'pickup' && !formData.pickupNotes.trim()) {
+      e.pickupNotes = 'Please propose a pickup time so we can confirm availability'
+    }
     setErrors(e)
     return Object.keys(e).length === 0
   }
@@ -248,19 +251,23 @@ export default function CheckoutPage() {
             </div>
 
             {formData.fulfillmentType === 'pickup' && (
-              <div className="rounded-lg bg-blue-50 border border-blue-100 px-4 py-3 space-y-3">
-                <p className="text-sm text-blue-800">
-                  <span className="font-semibold">📍 Pickup location:</span> Reno, NV {PICKUP_ZIP} — we&apos;ll email you to coordinate a time after your order is placed.
+              <div className="rounded-lg bg-blue-50 border border-blue-200 px-4 py-3 space-y-3">
+                <p className="text-sm text-blue-800 font-medium">
+                  📍 Pickup location: Reno, NV {PICKUP_ZIP}
                 </p>
                 <div>
-                  <label className="text-sm font-medium text-gray-700 block mb-1">Preferred pickup day / time (optional)</label>
+                  <label className="text-sm font-medium text-gray-700 block mb-1">
+                    When would you like to pick up? <span className="text-red-500">*</span>
+                  </label>
                   <textarea
                     value={formData.pickupNotes}
                     onChange={(e) => setFormData((f) => ({ ...f, pickupNotes: e.target.value }))}
                     rows={2}
-                    placeholder="e.g. Weekday afternoons, Saturday mornings..."
+                    required
+                    placeholder="e.g. This Saturday between 10am–2pm, or any weekday after 5pm..."
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none"
                   />
+                  {errors.pickupNotes && <p className="text-xs text-red-600 mt-1">{errors.pickupNotes}</p>}
                 </div>
               </div>
             )}
