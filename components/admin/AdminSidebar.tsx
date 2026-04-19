@@ -11,6 +11,7 @@ const navItems = [
   { href: '/admin/orders', label: 'Orders', icon: '📦', exact: false },
   { href: '/admin/messages', label: 'Messages', icon: '📬', exact: false },
   { href: '/admin/categories', label: 'Categories', icon: '🗂️', exact: false },
+  { href: '/admin/ebay', label: 'eBay Sync', icon: '🛒', exact: false },
 ]
 
 export function AdminSidebar() {

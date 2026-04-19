@@ -39,6 +39,7 @@ export interface Product {
   length_in: number | null
   width_in: number | null
   height_in: number | null
+  ebay_listing_id: string | null
   created_at: string
 }
 
@@ -125,6 +126,16 @@ export interface Offer {
   checkout_session_id: string | null
   created_at: string
   product?: { title: string; slug: string }
+}
+
+export interface EbayListing {
+  itemId: string
+  title: string
+  priceCents: number
+  description: string | null
+  imageUrls: string[]
+  condition: Condition
+  ebayUrl: string
 }
 
 export interface ItemRequest {
