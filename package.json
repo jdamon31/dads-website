@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@easypost/api": "^8.8.0",
     "@paypal/react-paypal-js": "^9.1.1",
     "@stripe/react-stripe-js": "^6.2.0",
     "@stripe/stripe-js": "^9.2.0",

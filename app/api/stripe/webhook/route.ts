@@ -118,6 +118,7 @@ export async function POST(req: NextRequest) {
   const shippingAddress = fulfillmentType === 'pickup'
     ? (meta.pickupNotes ? { notes: meta.pickupNotes } : null)
     : (meta.shippingAddress ? JSON.parse(meta.shippingAddress) : null)
+  const shippingCostCents = Number(meta.shippingCents ?? 0)
 
   if (productIds.length === 0) {
     console.error('Stripe webhook: no productIds in metadata for PI', paymentIntent.id)
@@ -147,6 +148,7 @@ export async function POST(req: NextRequest) {
       payment_status: 'paid',
       order_status: 'pending',
       total_cents: paymentIntent.amount,
+      shipping_cost_cents: shippingCostCents,
     })
     .select()
     .single()

@@ -35,6 +35,10 @@ export interface Product {
   is_special: boolean
   quantity: number
   offers_enabled: boolean
+  weight_oz: number | null
+  length_in: number | null
+  width_in: number | null
+  height_in: number | null
   created_at: string
 }
 
@@ -58,6 +62,12 @@ export interface ShippingAddress {
   zip: string
 }
 
+export interface ShippingRate {
+  rateCents: number
+  carrier: string
+  service: string
+}
+
 export interface Order {
   id: string
   created_at: string
@@ -71,6 +81,7 @@ export interface Order {
   payment_status: PaymentStatus
   order_status: OrderStatus
   total_cents: number
+  shipping_cost_cents: number
 }
 
 export interface OrderItem {

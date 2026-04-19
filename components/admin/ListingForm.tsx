@@ -30,6 +30,13 @@ export function ListingForm({ product }: Props) {
   const [isSpecial, setIsSpecial] = useState(product?.is_special ?? false)
   const [offersEnabled, setOffersEnabled] = useState(product?.offers_enabled ?? false)
   const [quantity, setQuantity] = useState(product?.quantity ?? 1)
+  // Weight stored as total oz; display split into lbs + oz for usability
+  const existingOz = product?.weight_oz ?? 0
+  const [weightLbs, setWeightLbs] = useState(existingOz ? String(Math.floor(existingOz / 16)) : '')
+  const [weightOz, setWeightOz] = useState(existingOz ? String(existingOz % 16) : '')
+  const [lengthIn, setLengthIn] = useState(product?.length_in ? String(product.length_in) : '')
+  const [widthIn, setWidthIn] = useState(product?.width_in ? String(product.width_in) : '')
+  const [heightIn, setHeightIn] = useState(product?.height_in ? String(product.height_in) : '')
   const [imageUrls, setImageUrls] = useState<string[]>(
     product?.images.map((i) => i.url) ?? []
   )
@@ -70,6 +77,12 @@ export function ListingForm({ product }: Props) {
       is_special: isSpecial,
       offers_enabled: offersEnabled,
       quantity: Number(quantity),
+      weight_oz: (weightLbs || weightOz)
+        ? (Number(weightLbs || 0) * 16) + Number(weightOz || 0)
+        : null,
+      length_in: lengthIn ? Number(lengthIn) : null,
+      width_in: widthIn ? Number(widthIn) : null,
+      height_in: heightIn ? Number(heightIn) : null,
       imageUrls,
     }
 
@@ -237,6 +250,70 @@ export function ListingForm({ product }: Props) {
             ))}
           </div>
         </div>
+
+        {/* Shipping dimensions — only relevant when item can ship */}
+        {fulfillment !== 'pickup' && (
+          <div className="sm:col-span-2 bg-gray-50 border border-gray-200 rounded-lg px-4 py-4 space-y-3">
+            <div>
+              <p className="text-sm font-medium text-gray-900">Shipping Details <span className="text-gray-400 font-normal">(optional)</span></p>
+              <p className="text-xs text-gray-500 mt-0.5">Used to calculate live shipping rates at checkout. Leave blank to show &ldquo;Contact us for a quote.&rdquo;</p>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs font-medium text-gray-700 block mb-1">Weight — lbs</label>
+                <input
+                  type="number" min="0" step="1"
+                  value={weightLbs}
+                  onChange={(e) => setWeightLbs(e.target.value)}
+                  placeholder="0"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-gray-700 block mb-1">Weight — oz</label>
+                <input
+                  type="number" min="0" max="15" step="1"
+                  value={weightOz}
+                  onChange={(e) => setWeightOz(e.target.value)}
+                  placeholder="0"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label className="text-xs font-medium text-gray-700 block mb-1">Length (in)</label>
+                <input
+                  type="number" min="0" step="0.5"
+                  value={lengthIn}
+                  onChange={(e) => setLengthIn(e.target.value)}
+                  placeholder="12"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-gray-700 block mb-1">Width (in)</label>
+                <input
+                  type="number" min="0" step="0.5"
+                  value={widthIn}
+                  onChange={(e) => setWidthIn(e.target.value)}
+                  placeholder="8"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-gray-700 block mb-1">Height (in)</label>
+                <input
+                  type="number" min="0" step="0.5"
+                  value={heightIn}
+                  onChange={(e) => setHeightIn(e.target.value)}
+                  placeholder="6"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                />
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="sm:col-span-2">
           <label className="text-sm font-medium text-gray-700 block mb-1">

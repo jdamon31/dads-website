@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { loadStripe } from '@stripe/stripe-js'
 import {
@@ -15,11 +15,9 @@ import { formatPrice } from '@/lib/utils'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
-import { ShippingAddress } from '@/types'
+import { ShippingAddress, ShippingRate } from '@/types'
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
-
-// ── Inner form that uses Stripe hooks ─────────────────────────────────────────
 const PICKUP_ZIP = '89509'
 
 interface CheckoutFormData {
@@ -31,17 +29,18 @@ interface CheckoutFormData {
   pickupNotes: string
 }
 
+// ── Stripe inner form ──────────────────────────────────────────────────────────
 function StripeCheckoutForm({
   formData,
   clientSecret,
-  productIds,
   totalCents,
+  shippingCents,
   onSuccess,
 }: {
   formData: CheckoutFormData
   clientSecret: string
-  productIds: string[]
   totalCents: number
+  shippingCents: number
   onSuccess: (orderId: string) => void
 }) {
   const stripe = useStripe()
@@ -56,7 +55,6 @@ function StripeCheckoutForm({
     setLoading(true)
     setError(null)
 
-    // Update PaymentIntent metadata before confirming
     const paymentIntentId = clientSecret.split('_secret_')[0]
     await fetch('/api/stripe/create-payment-intent', {
       method: 'POST',
@@ -72,6 +70,7 @@ function StripeCheckoutForm({
             ? JSON.stringify(formData.shippingAddress)
             : null,
         pickupNotes: formData.pickupNotes || null,
+        shippingCents,
       }),
     })
 
@@ -99,6 +98,8 @@ function StripeCheckoutForm({
     }
   }
 
+  const grandTotal = totalCents + shippingCents
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="border border-gray-300 rounded-lg px-3 py-3">
@@ -117,7 +118,7 @@ function StripeCheckoutForm({
             <Spinner size="sm" /> Processing...
           </span>
         ) : (
-          `Pay ${formatPrice(totalCents)}`
+          `Pay ${formatPrice(grandTotal)}`
         )}
       </Button>
     </form>
@@ -133,6 +134,8 @@ export default function CheckoutPage() {
 
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'paypal'>('stripe')
+  const [shippingRate, setShippingRate] = useState<ShippingRate | null>(null)
+  const [shippingState, setShippingState] = useState<'idle' | 'loading' | 'quote' | 'error'>('idle')
   const [formData, setFormData] = useState<CheckoutFormData>({
     buyerName: '',
     buyerEmail: '',
@@ -143,26 +146,56 @@ export default function CheckoutPage() {
   })
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({})
 
-  const totalCents = total()
+  const subtotalCents = total()
+  const shippingCents = shippingRate?.rateCents ?? 0
+  const grandTotalCents = subtotalCents + shippingCents
   const productIds = items.map((i) => i.product.id)
 
-  // Redirect to home if cart is empty
   useEffect(() => {
     if (items.length === 0) router.push('/')
   }, [items.length, router])
 
-  // Fetch Stripe client secret
+  // Create initial Stripe PI (amount without shipping — updated before confirm)
   useEffect(() => {
-    if (totalCents > 0) {
+    if (subtotalCents > 0) {
       fetch('/api/stripe/create-payment-intent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ totalCents, cartItems: items }),
+        body: JSON.stringify({ totalCents: subtotalCents, cartItems: items }),
       })
         .then((r) => r.json())
         .then((d) => setClientSecret(d.clientSecret))
     }
-  }, [totalCents]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [subtotalCents]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const fetchShipping = useCallback(async (zip: string) => {
+    if (zip.length !== 5 || !/^\d{5}$/.test(zip)) return
+    setShippingState('loading')
+    setShippingRate(null)
+    const res = await fetch('/api/shipping', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ toZip: zip, items }),
+    })
+    const data = await res.json()
+    if (data.rateCents !== undefined) {
+      setShippingRate({ rateCents: data.rateCents, carrier: data.carrier, service: data.service })
+      setShippingState('idle')
+    } else if (data.needsQuote) {
+      setShippingState('quote')
+    } else {
+      setShippingState('error')
+    }
+  }, [items])
+
+  // Refetch shipping when ZIP changes to a valid 5-digit value
+  useEffect(() => {
+    if (formData.fulfillmentType === 'ship') {
+      const zip = formData.shippingAddress.zip
+      if (zip.length === 5) fetchShipping(zip)
+      else { setShippingRate(null); setShippingState('idle') }
+    }
+  }, [formData.shippingAddress.zip, formData.fulfillmentType, fetchShipping])
 
   function validate(): boolean {
     const e: Partial<Record<string, string>> = {}
@@ -187,6 +220,8 @@ export default function CheckoutPage() {
   }
 
   if (items.length === 0) return null
+
+  const isShip = formData.fulfillmentType === 'ship'
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
@@ -240,7 +275,11 @@ export default function CheckoutPage() {
                     name="fulfillment"
                     value={opt}
                     checked={formData.fulfillmentType === opt}
-                    onChange={() => setFormData((f) => ({ ...f, fulfillmentType: opt }))}
+                    onChange={() => {
+                      setFormData((f) => ({ ...f, fulfillmentType: opt }))
+                      setShippingRate(null)
+                      setShippingState('idle')
+                    }}
                     className="sr-only"
                   />
                   <span className="text-sm font-medium capitalize">
@@ -263,7 +302,6 @@ export default function CheckoutPage() {
                     value={formData.pickupNotes}
                     onChange={(e) => setFormData((f) => ({ ...f, pickupNotes: e.target.value }))}
                     rows={2}
-                    required
                     placeholder="e.g. This Saturday between 10am–2pm, or any weekday after 5pm..."
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none"
                   />
@@ -364,8 +402,8 @@ export default function CheckoutPage() {
                 <StripeCheckoutForm
                   formData={formData}
                   clientSecret={clientSecret}
-                  productIds={productIds}
-                  totalCents={totalCents}
+                  totalCents={subtotalCents}
+                  shippingCents={shippingCents}
                   onSuccess={handleSuccess}
                 />
               </Elements>
@@ -382,7 +420,7 @@ export default function CheckoutPage() {
                     const res = await fetch('/api/paypal/create-order', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ totalCents }),
+                      body: JSON.stringify({ totalCents: grandTotalCents }),
                     })
                     const data = await res.json()
                     return data.orderId
@@ -402,8 +440,9 @@ export default function CheckoutPage() {
                             ? formData.shippingAddress
                             : null,
                         pickupNotes: formData.pickupNotes || null,
+                        shippingCents,
                         productIds,
-                        totalCents,
+                        totalCents: grandTotalCents,
                       }),
                     })
                     const result = await res.json()
@@ -435,9 +474,47 @@ export default function CheckoutPage() {
                 </div>
               ))}
             </div>
-            <div className="border-t border-gray-300 pt-4 flex justify-between font-bold text-gray-900">
-              <span>Total</span>
-              <span>{formatPrice(totalCents)}</span>
+
+            <div className="border-t border-gray-200 pt-3 space-y-2">
+              <div className="flex justify-between text-sm text-gray-600">
+                <span>Subtotal</span>
+                <span>{formatPrice(subtotalCents)}</span>
+              </div>
+
+              {isShip && (
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>Shipping</span>
+                  <span>
+                    {shippingState === 'loading' && (
+                      <span className="flex items-center gap-1 text-gray-400">
+                        <Spinner size="sm" /> Calculating...
+                      </span>
+                    )}
+                    {shippingState === 'idle' && shippingRate && (
+                      <span className="text-gray-900 font-medium">
+                        {formatPrice(shippingRate.rateCents)}
+                        <span className="text-xs text-gray-400 ml-1">
+                          {shippingRate.carrier} {shippingRate.service}
+                        </span>
+                      </span>
+                    )}
+                    {shippingState === 'idle' && !shippingRate && (
+                      <span className="text-gray-400 italic text-xs">Enter ZIP to calculate</span>
+                    )}
+                    {shippingState === 'quote' && (
+                      <span className="text-brand-600 text-xs font-medium">Contact us for quote</span>
+                    )}
+                    {shippingState === 'error' && (
+                      <span className="text-red-500 text-xs">Unavailable</span>
+                    )}
+                  </span>
+                </div>
+              )}
+
+              <div className="flex justify-between font-bold text-gray-900 pt-2 border-t border-gray-300">
+                <span>Total</span>
+                <span>{formatPrice(grandTotalCents)}</span>
+              </div>
             </div>
           </div>
         </div>
