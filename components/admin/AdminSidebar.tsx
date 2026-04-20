@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { signOut } from 'next-auth/react'
 import { cn } from '@/lib/utils'
@@ -19,9 +20,15 @@ export function AdminSidebar() {
 
   return (
     <aside className="w-56 shrink-0 bg-gray-900 text-white flex flex-col min-h-screen">
-      <div className="px-5 py-6 border-b border-gray-700">
-        <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">Admin</p>
-        <p className="font-black text-xl tracking-tight">REPLAY INDUSTRIAL</p>
+      <div className="px-4 py-4 border-b border-gray-700 flex flex-col items-center gap-1">
+        <Image
+          src="/logo.png"
+          alt="Replay Industrial"
+          width={120}
+          height={40}
+          className="h-10 w-auto object-contain"
+        />
+        <p className="text-xs uppercase tracking-widest text-gray-400">Admin</p>
       </div>
 
       <nav className="flex-1 py-4 space-y-0.5 px-2">

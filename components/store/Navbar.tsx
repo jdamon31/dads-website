@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useState } from 'react'
 import { useCart } from '@/hooks/useCart'
 import { CartDrawer } from './CartDrawer'
@@ -13,11 +14,15 @@ export function Navbar() {
     <>
       <nav className="sticky top-0 z-30 bg-dark-900 shadow-lg">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link
-            href="/"
-            className="text-base sm:text-xl font-black text-white tracking-tight hover:text-brand-400 transition-colors"
-          >
-            REPLAY INDUSTRIAL
+          <Link href="/" className="flex items-center hover:opacity-85 transition-opacity">
+            <Image
+              src="/logo.png"
+              alt="Replay Industrial"
+              width={140}
+              height={48}
+              className="h-11 w-auto object-contain"
+              priority
+            />
           </Link>
 
           <div className="flex items-center gap-1">
