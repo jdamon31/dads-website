@@ -14,15 +14,19 @@ export function Navbar() {
     <>
       <nav className="sticky top-0 z-30 bg-dark-900 shadow-lg">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center hover:opacity-85 transition-opacity">
+          <Link href="/" className="flex items-center gap-3 hover:opacity-85 transition-opacity">
             <Image
               src="/logo.png"
-              alt="Replay Industrial"
-              width={140}
-              height={48}
-              className="h-11 w-auto object-contain"
+              alt="Replay Industrial logo"
+              width={44}
+              height={44}
+              className="h-11 w-11 object-contain shrink-0"
               priority
             />
+            <span className="text-white font-bold text-lg leading-tight tracking-wide">
+              Replay<br />
+              <span className="text-sm font-semibold tracking-widest uppercase text-slate-300">Industrial</span>
+            </span>
           </Link>
 
           <div className="flex items-center gap-1">

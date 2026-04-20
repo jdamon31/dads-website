@@ -20,15 +20,18 @@ export function AdminSidebar() {
 
   return (
     <aside className="w-56 shrink-0 bg-gray-900 text-white flex flex-col min-h-screen">
-      <div className="px-4 py-4 border-b border-gray-700 flex flex-col items-center gap-1">
+      <div className="px-4 py-4 border-b border-gray-700 flex items-center gap-3">
         <Image
           src="/logo.png"
-          alt="Replay Industrial"
-          width={120}
+          alt="Replay Industrial logo"
+          width={40}
           height={40}
-          className="h-10 w-auto object-contain"
+          className="h-10 w-10 object-contain shrink-0"
         />
-        <p className="text-xs uppercase tracking-widest text-gray-400">Admin</p>
+        <div>
+          <p className="text-white font-bold text-sm leading-tight">Replay Industrial</p>
+          <p className="text-xs uppercase tracking-widest text-gray-400">Admin</p>
+        </div>
       </div>
 
       <nav className="flex-1 py-4 space-y-0.5 px-2">
