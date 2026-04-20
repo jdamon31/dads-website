@@ -48,5 +48,5 @@ export async function POST() {
 
   const existingIds = new Set((existing ?? []).map((p) => p.ebay_listing_id))
 
-  return NextResponse.json({ listings, existingIds: [...existingIds], markedSold })
+  return NextResponse.json({ listings, existingIds: Array.from(existingIds), markedSold })
 }
