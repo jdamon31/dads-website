@@ -71,7 +71,7 @@ export async function calculateShipping(
     })
 
     const rates: Array<{ rate: string; carrier: string; service: string }> =
-      (shipment as any).rates ?? []
+      (shipment as { rates?: Array<{ rate: string; carrier: string; service: string }> }).rates ?? []
 
     if (!rates.length) {
       return { error: 'No rates available for this destination' }

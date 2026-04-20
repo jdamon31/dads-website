@@ -79,7 +79,7 @@ export default function EbaySyncPage() {
   function toggle(itemId: string) {
     setSelected((prev) => {
       const next = new Set(prev)
-      next.has(itemId) ? next.delete(itemId) : next.add(itemId)
+      if (next.has(itemId)) { next.delete(itemId) } else { next.add(itemId) }
       return next
     })
   }
